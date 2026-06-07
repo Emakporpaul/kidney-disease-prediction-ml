@@ -1,0 +1,18 @@
+# Python
+venv/
+.env
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Windows
+desktop.ini
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# Model artifacts (optional if very large)
+# *.pkl
