@@ -1,3 +1,12 @@
+---
+title: CKD Prediction API
+emoji: 🩺
+colorFrom: blue
+colorTo: green
+sdk: docker
+pinned: false
+---
+
 # 🩺 Chronic Kidney Disease Prediction
 
 [![CI](https://github.com/Emakporpaul/ckd-prediction/actions/workflows/ci.yml/badge.svg)](https://github.com/Emakporpaul/ckd-prediction/actions/workflows/ci.yml)
@@ -23,17 +32,17 @@ A production-quality machine learning system that predicts **Chronic Kidney Dise
 
 ## Results
 
-Best model: **Random Forest** (selected by ROC-AUC on held-out test set)
+Best model: **Random Forest** — ROC-AUC 1.000 | Accuracy 98.75% | Recall 100% (zero missed CKD patients)
 
-| Model | Accuracy | Precision | Recall | F1 | ROC-AUC |
-|-------|----------|-----------|--------|----|---------|
-| Random Forest | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| XGBoost | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| Gradient Boosting | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| SVM | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| Logistic Regression | 0.99 | 0.98 | 1.00 | 0.99 | 1.00 |
-| Decision Tree | 0.99 | 0.98 | 1.00 | 0.99 | 0.99 |
-| KNN | 0.98 | 0.97 | 0.99 | 0.98 | 0.99 |
+| Model | Accuracy | Precision | Recall | F1 | ROC-AUC | CV ROC-AUC |
+|-------|----------|-----------|--------|----|---------|------------|
+| Random Forest | 0.9875 | 0.9804 | 1.00 | 0.9901 | 1.0000 | 0.9990 ± 0.0021 |
+| XGBoost | 0.9875 | 1.0000 | 0.98 | 0.9899 | 0.9993 | 0.9902 ± 0.0041 |
+| Gradient Boosting | 0.9500 | 0.9792 | 0.94 | 0.9592 | 0.9980 | 0.9977 ± 0.0023 |
+| Logistic Regression | 0.9625 | 1.0000 | 0.94 | 0.9691 | 0.9900 | 0.9998 ± 0.0004 |
+| SVM | 0.9375 | 1.0000 | 0.90 | 0.9474 | 0.9900 | 0.9998 ± 0.0004 |
+| Decision Tree | 0.9500 | 1.0000 | 0.92 | 0.9583 | 0.9827 | 0.9610 ± 0.0280 |
+| KNN | 0.9375 | 1.0000 | 0.90 | 0.9474 | 0.9700 | 0.9818 ± 0.0154 |
 
 > **Why not deep learning?** The dataset has 400 samples — too small for neural networks to generalise reliably. Tree-based ensembles are the correct tool at this scale.
 
