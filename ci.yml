@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      # ── Download model artefacts from Hugging Face ──────────────────────────
+      # The model artefacts are stored on Hugging Face (not in Git).
+      # We download them here so the API tests can load them.
+      - name: Download model artefacts from Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python - <<'EOF'
+          from huggingface_hub import hf_hub_download
+          import os
+
+          repo_id = "Emakporpaul/ckd-prediction"
+          local_dir = "model"
+          os.makedirs(local_dir, exist_ok=True)
+
+          artefacts = [
+              "kidney_model.pkl",
+              "scaler.pkl",
+              "label_encoders.pkl",
+              "feature_names.json",
+          ]
+
+          for filename in artefacts:
+              path = hf_hub_download(
+                  repo_id=repo_id,
+                  filename=filename,
+                  local_dir=local_dir,
+                  token=os.getenv("HF_TOKEN"),
+              )
+              print(f"Downloaded: {path}")
+
+          print("All artefacts ready.")
+          EOF
+
+      # ── Preprocessing unit tests ────────────────────────────────────────────
+      - name: Run preprocessing tests
+        run: |
+          pytest tests/test_preprocess.py -v --tb=short
+
+      # ── API integration tests ───────────────────────────────────────────────
+      - name: Run API tests
+        run: |
+          pytest tests/test_api.py -v --tb=short
+
+      # ── Full test suite with coverage ───────────────────────────────────────
+      - name: Run full test suite with coverage
+        run: |
+          pytest tests/ -v \
+            --cov=src \
+            --cov-report=term-missing \
+            --cov-report=xml \
+            --tb=short
+
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.xml
+          fail_ci_if_error: false   # coverage upload failure won't break the build
+
+  # ── Lint ────────────────────────────────────────────────────────────────────
+  lint:
+    name: Lint (ruff)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install ruff
+        run: pip install ruff~=0.9
+
+      - name: Run ruff linter
+        run: ruff check src/ app.py schemas.py
+
+      - name: Run ruff formatter check
+        run: ruff format --check src/ app.py schemas.py

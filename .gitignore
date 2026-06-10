@@ -1,18 +1,74 @@
 # Python
-venv/
-.env
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
 
-# Jupyter
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+.env
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Model artefacts (stored on Hugging Face, not in Git)
+model/*.pkl
+model/*.npy
+model/*.json
+model/*.csv
+# Keep the model directory itself
+!model/.gitkeep
+
+# Jupyter notebooks
 .ipynb_checkpoints/
+*.ipynb_checkpoints
 
-# Windows
-desktop.ini
-Thumbs.db
+# Data files
+data/*.csv
+data/*.xlsx
+data/*.json
+# Keep the data directory itself
+!data/.gitkeep
 
-# VS Code
+# Visualisations (generated, not source-controlled)
+visualizations/*.png
+visualizations/*.jpg
+visualizations/*.svg
+!visualizations/.gitkeep
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+*.cover
+
+# Build / packaging 
+dist/
+build/
+*.egg-info/
+*.egg
+MANIFEST
+
+# IDEs 
 .vscode/
+.idea/
+*.swp
+*.swo
+*~
 
-# Model artifacts (optional if very large)
-# *.pkl
+#  OS files 
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs 
+*.log
+logs/

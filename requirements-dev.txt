@@ -1,0 +1,24 @@
+# requirements-dev.txt
+# ─────────────────────────────────────────────────────────────────────────────
+# Development-only dependencies — testing, linting, notebooks.
+# Install alongside runtime deps:
+#   pip install -r requirements.txt -r requirements-dev.txt
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Runtime deps (inherit)
+-r requirements.txt
+
+# Testing
+pytest~=8.3
+pytest-cov~=6.0
+httpx~=0.28          # required by FastAPI TestClient
+
+# Notebooks
+jupyter~=1.1
+ipykernel~=6.29
+matplotlib~=3.9
+seaborn~=0.13
+scipy~=1.13
+
+# Code quality
+ruff~=0.9            # linter + formatter (replaces flake8 + black)

@@ -1,0 +1,16 @@
+# Runtime dependencies — everything needed to run the API in production.
+# Pin minor versions for reproducibility; allow patch updates (~=).
+
+# API framework
+fastapi~=0.115
+uvicorn[standard]~=0.34
+pydantic~=2.10
+
+# ML / data
+numpy~=1.26
+pandas~=2.2
+scikit-learn~=1.5
+xgboost~=2.1
+
+# Model artefact download from Hugging Face
+huggingface_hub~=0.27
