@@ -780,7 +780,7 @@
 
 <!-- FOOTER -->
 <footer>
-  <span>CKD Predictor · Paul Emakpor · 2025</span>
+  <span>CKD Predictor · Paul Emakpor · AI/ML Engineer · 2026</span>
   <div class="footer-links">
     <a href="https://github.com/Emakporpaul/kidney-disease-prediction-ml" target="_blank">GitHub</a>
     <a href="https://huggingface.co/Emakporpaul" target="_blank">Hugging Face</a>
@@ -822,15 +822,29 @@ document.getElementById('ckd-form').addEventListener('submit', async (e) => {
   document.getElementById('predict-btn').disabled = true;
 
   try {
-    const res = await fetch(API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+    let res;
+    try {
+      res = await fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch (networkErr) {
+      // Network-level failure: CORS, Space offline, DNS failure
+      showError(
+        'Cannot reach the API server.',
+        'The HF Space may be sleeping (first request takes ~30s to wake up). ' +
+        'Open https://emakporpaul-ckd-prediction-api.hf.space/health in a new tab to wake it, then try again.\n\n' +
+        'Technical detail: ' + networkErr.message
+      );
+      return;
+    }
 
     if (!res.ok) {
-      const err = await res.json().catch(() => ({ detail: 'Unknown error' }));
-      throw new Error(err.detail || `HTTP ${res.status}`);
+      let detail = `HTTP ${res.status}`;
+      try { const body = await res.json(); detail = body.detail || detail; } catch (_) {}
+      showError('The API returned an error.', detail);
+      return;
     }
 
     const result = await res.json();
@@ -838,12 +852,44 @@ document.getElementById('ckd-form').addEventListener('submit', async (e) => {
     showResult(result);
 
   } catch (err) {
-    alert(`Prediction failed: ${err.message}\n\nMake sure the HF Space is running at:\nhttps://emakporpaul-ckd-prediction-api.hf.space`);
+    showError('Unexpected error.', err.message);
   } finally {
     document.getElementById('loading').classList.remove('active');
     document.getElementById('predict-btn').disabled = false;
   }
 });
+
+// ── Show error card
+function showError(title, detail) {
+  const section = document.getElementById('result-section');
+  const card = document.getElementById('result-card');
+  card.className = 'result-card fade-in';
+  card.style.cssText += ';border-top:3px solid var(--red)';
+  card.innerHTML = `
+    <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:20px;">
+      <div style="width:52px;height:52px;border-radius:50%;background:var(--red-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg viewBox="0 0 24 24" style="width:24px;height:24px;stroke:var(--red);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-3);margin-bottom:4px;">Connection Error</div>
+        <div style="font-size:18px;font-weight:600;color:var(--red);margin-bottom:8px;">${title}</div>
+        <div style="font-size:13px;color:var(--text-2);line-height:1.6;">${detail}</div>
+      </div>
+    </div>
+    <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 16px;font-size:13px;color:var(--text-2);line-height:1.8;margin-bottom:16px;">
+      <strong style="color:var(--text-1);">Troubleshooting:</strong><br>
+      1. HF Space may be sleeping &mdash; <a href="https://emakporpaul-ckd-prediction-api.hf.space/health" target="_blank" style="color:var(--accent)">click here to wake it</a>, wait 30s, try again.<br>
+      2. Check <a href="https://huggingface.co/spaces/Emakporpaul/ckd-prediction-api" target="_blank" style="color:var(--accent)">Space logs</a> for build errors.<br>
+      3. Or test directly in <a href="https://emakporpaul-ckd-prediction-api.hf.space/docs" target="_blank" style="color:var(--accent)">Swagger UI</a>.
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn-outline" onclick="scrollToForm()">Try again</button>
+      <a class="btn-outline" href="https://emakporpaul-ckd-prediction-api.hf.space/docs" target="_blank" style="text-decoration:none">Open API directly</a>
+    </div>
+  `;
+  section.style.display = 'block';
+  section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 // ── Render result
 function showResult(r) {

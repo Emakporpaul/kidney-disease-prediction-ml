@@ -42,8 +42,7 @@ from schemas import PatientFeatures, PredictionResult
 
 # Hugging Face artefact download
 
-HF_REPO_ID = "Emakporpaul/ckd-prediction"
-
+HF_REPO_ID  = "Emakporpaul/ckd-prediction"
 HF_ARTEFACTS = [
     "kidney_model.pkl",
     "scaler.pkl",
@@ -115,35 +114,29 @@ store = _Store()
 async def lifespan(app: FastAPI):
     print("🔄  Loading model artefacts...")
 
-    # Download from HF if not already cached locally
     _download_artefacts_from_hf()
 
-    # Load trained model
     if not MODEL_PATH.exists():
         raise FileNotFoundError(f"Model not found at {MODEL_PATH}.")
     with open(MODEL_PATH, "rb") as f:
         store.model = pickle.load(f)
     store.model_name = type(store.model).__name__
 
-    # Load scaler
     if not SCALER_PATH.exists():
         raise FileNotFoundError(f"Scaler not found at {SCALER_PATH}.")
     with open(SCALER_PATH, "rb") as f:
         store.scaler = pickle.load(f)
 
-    # Load label encoders
     if not ENCODER_PATH.exists():
         raise FileNotFoundError(f"Encoders not found at {ENCODER_PATH}.")
     with open(ENCODER_PATH, "rb") as f:
         store.encoders = pickle.load(f)
 
-    # Load feature names
     if not FEATURE_PATH.exists():
         raise FileNotFoundError(f"Feature names not found at {FEATURE_PATH}.")
     with open(FEATURE_PATH) as f:
         store.feature_names = json.load(f)
 
-    # Load model metrics (optional)
     if MODEL_RESULTS_PATH.exists():
         results_df = pd.read_csv(MODEL_RESULTS_PATH)
         CLASS_TO_FRIENDLY = {
@@ -192,10 +185,14 @@ app = FastAPI(
     lifespan    = lifespan,
 )
 
+# CORS
+# allow_credentials MUST be False when allow_origins=["*"].
+# Setting both to True/["*"] simultaneously is rejected by all modern browsers
+# with a CORS preflight failure, causing "Failed to fetch" on the frontend.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins     = ["*"],
-    allow_credentials = True,
+    allow_origins     = ["*"],   # allow any origin (GitHub Pages, localhost, etc.)
+    allow_credentials = False,   # ← must be False with wildcard origins
     allow_methods     = ["*"],
     allow_headers     = ["*"],
 )
@@ -204,6 +201,7 @@ app.add_middleware(
 # Helpers
 
 def _impute_missing_inference(patient_dict: dict) -> dict:
+    """Fill None fields with training-set medians / modes."""
     numerical_medians = {
         "age": 55.0, "blood_pressure": 80.0, "specific_gravity": 1.020,
         "albumin": 0.0, "sugar": 0.0, "blood_glucose_random": 121.0,
@@ -312,8 +310,8 @@ def predict(patient: PatientFeatures):
         )
     except Exception as exc:
         raise HTTPException(
-            status_code=500,
-            detail=f"Prediction failed: {str(exc)}",
+            status_code = 500,
+            detail      = f"Prediction failed: {str(exc)}",
         ) from exc
 
 
