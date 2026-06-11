@@ -696,11 +696,17 @@ function showError(title, detail) {
   section.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+// Store original card HTML once on page load so we can restore it
+// after showError() wipes innerHTML
+const _originalCardHTML = document.getElementById('result-card').innerHTML;
+
 function showResult(r) {
   const isCKD = r.prediction === 1;
-  const card = document.getElementById('result-card');
   const section = document.getElementById('result-section');
 
+  // Restore original card structure in case showError() replaced it
+  const card = document.getElementById('result-card');
+  card.innerHTML = _originalCardHTML;
   card.className = 'result-card fade-in ' + (isCKD ? 'ckd' : 'no-ckd');
   card.style.borderTop = '';
 
