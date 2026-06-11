@@ -842,11 +842,15 @@ document.getElementById('ckd-form').addEventListener('submit', async (e) => {
 
     if (!res.ok) {
       let detail = `HTTP ${res.status}`;
-      try { const body = await res.json(); detail = body.detail || detail; } catch (_) {}
+      try {
+        const body = await res.json();
+        if (typeof body.detail === 'string') detail = body.detail;
+        else if (Array.isArray(body.detail)) detail = body.detail.map(e => e.msg || JSON.stringify(e)).join(', ');
+        else if (body.detail) detail = JSON.stringify(body.detail);
+      } catch (_) {}
       showError('The API returned an error.', detail);
       return;
     }
-
     const result = await res.json();
     lastResult = result;
     showResult(result);
@@ -913,7 +917,7 @@ function showResult(r) {
 
   // probs
   const pCKD = ((r.probability_ckd ?? 0) * 100).toFixed(1) + '%';
-  const pNo  = ((r.probability_not_ckd ?? 0) * 100).toFixed(1) + '%';
+  const pNo  = ((r.probability_no_ckd ?? 0) * 100).toFixed(1) + '%';
   document.getElementById('prob-ckd').textContent = pCKD;
   document.getElementById('prob-no-ckd').textContent = pNo;
   setTimeout(() => {
@@ -922,7 +926,7 @@ function showResult(r) {
   }, 50);
 
   // meta
-  document.getElementById('result-model').textContent = 'Model: ' + (r.model_name ?? 'RandomForestClassifier');
+  document.getElementById('result-model').textContent = 'Model: ' + (r.model ?? 'RandomForestClassifier');
   document.getElementById('result-ts').textContent = new Date().toLocaleString();
 
   // warning
