@@ -546,7 +546,7 @@
 
       <div class="field">
         <label>Pus Cells</label>
-        <select name="pus_cells">
+        <select name="pus_cell">
           <option value="">Select</option>
           <option value="normal">Normal</option>
           <option value="abnormal">Abnormal</option>
@@ -912,8 +912,8 @@ function showResult(r) {
   vt.className = 'verdict-text ' + (isCKD ? 'ckd' : 'no-ckd');
 
   // probs
-  const pCKD = ((r.prob_ckd ?? 0) * 100).toFixed(1) + '%';
-  const pNo  = ((r.prob_not_ckd ?? 0) * 100).toFixed(1) + '%';
+  const pCKD = ((r.probability_ckd ?? 0) * 100).toFixed(1) + '%';
+  const pNo  = ((r.probability_not_ckd ?? 0) * 100).toFixed(1) + '%';
   document.getElementById('prob-ckd').textContent = pCKD;
   document.getElementById('prob-no-ckd').textContent = pNo;
   setTimeout(() => {
