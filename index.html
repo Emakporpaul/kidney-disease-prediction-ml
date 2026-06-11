@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CKD Risk Predictor — Chronic Kidney Disease Assessment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:          #0B0E14;
+    --surface:     #111520;
+    --surface-2:   #171C2C;
+    --surface-3:   #1E2438;
+    --border:      rgba(255,255,255,0.07);
+    --border-2:    rgba(255,255,255,0.13);
+    --accent:      #3B82F6;
+    --accent-dim:  rgba(59,130,246,0.12);
+    --accent-glow: rgba(59,130,246,0.25);
+    --green:       #10B981;
+    --green-dim:   rgba(16,185,129,0.12);
+    --red:         #EF4444;
+    --red-dim:     rgba(239,68,68,0.12);
+    --amber:       #F59E0B;
+    --amber-dim:   rgba(245,158,11,0.12);
+    --text-1:      #F0F2F8;
+    --text-2:      #9BA3BC;
+    --text-3:      #5A627A;
+    --mono:        'JetBrains Mono', monospace;
+    --sans:        'Inter', sans-serif;
+    --r-sm:        6px;
+    --r-md:        10px;
+    --r-lg:        16px;
+    --r-xl:        20px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text-1);
+    min-height: 100vh;
+    line-height: 1.6;
+    font-size: 15px;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2rem;
+    height: 60px;
+    background: rgba(11,14,20,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-brand {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 600; font-size: 15px; color: var(--text-1);
+    text-decoration: none;
+  }
+  .nav-logo {
+    width: 28px; height: 28px;
+    background: var(--accent);
+    border-radius: var(--r-sm);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .nav-logo svg { width: 16px; height: 16px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .nav-links { display: flex; align-items: center; gap: 6px; }
+  .nav-pill {
+    padding: 5px 14px; border-radius: 999px;
+    font-size: 13px; font-weight: 500; color: var(--text-2);
+    text-decoration: none; border: 1px solid transparent;
+    transition: all 0.15s;
+  }
+  .nav-pill:hover { color: var(--text-1); border-color: var(--border-2); background: var(--surface-2); }
+  .nav-cta {
+    padding: 6px 16px; border-radius: 999px;
+    font-size: 13px; font-weight: 500;
+    background: var(--accent); color: white;
+    text-decoration: none; border: none; cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .nav-cta:hover { opacity: 0.85; }
+
+  /* ── HERO ── */
+  .hero {
+    max-width: 900px; margin: 0 auto;
+    padding: 80px 2rem 60px;
+    text-align: center;
+  }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 5px 14px; border-radius: 999px;
+    border: 1px solid rgba(59,130,246,0.3);
+    background: var(--accent-dim);
+    font-size: 12px; font-weight: 500;
+    color: #93C5FD; letter-spacing: 0.04em;
+    text-transform: uppercase; margin-bottom: 24px;
+  }
+  .hero-eyebrow span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: block; }
+  h1 {
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 600; letter-spacing: -0.03em;
+    line-height: 1.15; color: var(--text-1);
+    margin-bottom: 20px;
+  }
+  h1 em { font-style: normal; color: var(--accent); }
+  .hero-sub {
+    font-size: 17px; color: var(--text-2);
+    max-width: 560px; margin: 0 auto 40px;
+    line-height: 1.7;
+  }
+  .hero-stats {
+    display: flex; justify-content: center; gap: 40px;
+    margin-bottom: 48px; flex-wrap: wrap;
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: var(--mono);
+    font-size: 26px; font-weight: 500; color: var(--text-1);
+    letter-spacing: -0.02em;
+  }
+  .stat-num small { font-size: 14px; color: var(--text-3); }
+  .stat-label { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+
+  .scroll-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 28px; border-radius: var(--r-md);
+    background: var(--accent); color: white;
+    font-weight: 500; font-size: 15px;
+    text-decoration: none; border: none; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .scroll-cta:hover { background: #2563EB; transform: translateY(-1px); }
+  .scroll-cta svg { width: 16px; height: 16px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ── MODELS STRIP ── */
+  .models-strip {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 2rem;
+    display: flex; align-items: center; justify-content: center;
+    gap: 32px; flex-wrap: wrap;
+    background: var(--surface);
+  }
+  .model-badge {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--text-3);
+  }
+  .model-badge .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .model-badge strong { color: var(--text-2); font-weight: 500; }
+  .best-badge { color: #93C5FD; }
+  .best-badge .dot { background: var(--accent); }
+
+  /* ── SECTION ── */
+  .section { max-width: 900px; margin: 0 auto; padding: 60px 2rem; }
+  .section-label {
+    font-family: var(--mono); font-size: 11px; font-weight: 500;
+    color: var(--text-3); letter-spacing: 0.1em;
+    text-transform: uppercase; margin-bottom: 24px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-label::after {
+    content: ''; flex: 1; height: 1px;
+    background: var(--border);
+  }
+
+  /* ── FORM LAYOUT ── */
+  #predictor { scroll-margin-top: 80px; }
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 11px; font-weight: 500; color: var(--text-3);
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .field label span {
+    font-size: 10px; color: var(--text-3);
+    font-weight: 400; text-transform: none; letter-spacing: 0;
+    margin-left: 4px;
+  }
+  .field input, .field select {
+    background: var(--surface-2);
+    border: 1px solid var(--border-2);
+    border-radius: var(--r-sm);
+    color: var(--text-1);
+    font-family: var(--mono); font-size: 14px;
+    padding: 9px 12px;
+    outline: none;
+    transition: border-color 0.15s;
+    appearance: none;
+    width: 100%;
+  }
+  .field input:focus, .field select:focus { border-color: var(--accent); }
+  .field input::placeholder { color: var(--text-3); }
+  .field select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%235A627A' d='M4 6l4 4 4-4'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 16px; padding-right: 32px; }
+  .field select option { background: #1E2438; }
+
+  .form-group-title {
+    grid-column: 1 / -1;
+    font-size: 11px; font-weight: 500;
+    color: var(--text-3); letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 16px 0 4px;
+    border-top: 1px solid var(--border);
+    margin-top: 8px;
+  }
+  .form-group-title:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+
+  .submit-row {
+    grid-column: 1 / -1;
+    display: flex; align-items: center; gap: 12px;
+    margin-top: 8px; flex-wrap: wrap;
+  }
+  .btn-predict {
+    padding: 12px 32px; border-radius: var(--r-md);
+    background: var(--accent); color: white;
+    font-family: var(--sans); font-weight: 600; font-size: 15px;
+    border: none; cursor: pointer;
+    transition: all 0.15s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .btn-predict:hover { background: #2563EB; transform: translateY(-1px); }
+  .btn-predict:active { transform: translateY(0); }
+  .btn-predict:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-reset {
+    padding: 12px 20px; border-radius: var(--r-md);
+    background: transparent; color: var(--text-3);
+    font-family: var(--sans); font-size: 14px;
+    border: 1px solid var(--border-2); cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-reset:hover { color: var(--text-1); border-color: var(--border); }
+  .api-note {
+    font-size: 12px; color: var(--text-3); margin-left: auto;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .api-note .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+
+  /* ── RESULT ── */
+  #result-section { display: none; scroll-margin-top: 80px; }
+
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border-2);
+    border-radius: var(--r-xl);
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .result-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .result-card.ckd::before { background: var(--red); }
+  .result-card.no-ckd::before { background: var(--green); }
+
+  .result-header {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; gap: 20px;
+    margin-bottom: 28px; flex-wrap: wrap;
+  }
+  .result-verdict {
+    display: flex; align-items: center; gap: 14px;
+  }
+  .verdict-icon {
+    width: 52px; height: 52px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .verdict-icon.ckd { background: var(--red-dim); }
+  .verdict-icon.no-ckd { background: var(--green-dim); }
+  .verdict-icon svg { width: 24px; height: 24px; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+  .verdict-icon.ckd svg { stroke: var(--red); }
+  .verdict-icon.no-ckd svg { stroke: var(--green); }
+
+  .verdict-label { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); margin-bottom: 4px; }
+  .verdict-text { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
+  .verdict-text.ckd { color: var(--red); }
+  .verdict-text.no-ckd { color: var(--green); }
+
+  .result-meta { text-align: right; }
+  .result-model { font-family: var(--mono); font-size: 11px; color: var(--text-3); }
+  .result-ts { font-family: var(--mono); font-size: 11px; color: var(--text-3); }
+
+  .prob-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .prob-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 16px;
+  }
+  .prob-label { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); margin-bottom: 8px; }
+  .prob-value { font-family: var(--mono); font-size: 28px; font-weight: 500; }
+  .prob-value.ckd { color: var(--red); }
+  .prob-value.no-ckd { color: var(--green); }
+  .prob-bar { height: 4px; border-radius: 2px; background: var(--border); margin-top: 10px; overflow: hidden; }
+  .prob-fill { height: 100%; border-radius: 2px; transition: width 0.6s cubic-bezier(0.16,1,0.3,1); }
+  .prob-fill.ckd { background: var(--red); }
+  .prob-fill.no-ckd { background: var(--green); }
+
+  .warning-box {
+    display: flex; align-items: flex-start; gap: 12px;
+    background: var(--amber-dim);
+    border: 1px solid rgba(245,158,11,0.25);
+    border-radius: var(--r-md);
+    padding: 14px 16px;
+    margin-bottom: 20px;
+  }
+  .warning-box svg { width: 18px; height: 18px; stroke: var(--amber); fill: none; stroke-width: 2; flex-shrink: 0; margin-top: 1px; }
+  .warning-box p { font-size: 13px; color: #FCD34D; line-height: 1.5; }
+
+  .disclaimer-box {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 14px 16px;
+    font-size: 12px; color: var(--text-3); line-height: 1.6;
+  }
+  .disclaimer-box strong { color: var(--text-2); }
+
+  .result-actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+  .btn-outline {
+    padding: 9px 18px; border-radius: var(--r-sm);
+    background: transparent; color: var(--text-2);
+    font-family: var(--sans); font-size: 13px; font-weight: 500;
+    border: 1px solid var(--border-2); cursor: pointer;
+    transition: all 0.15s; display: flex; align-items: center; gap: 6px;
+  }
+  .btn-outline:hover { color: var(--text-1); border-color: var(--border); background: var(--surface-2); }
+  .btn-outline svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+  /* ── LOADING ── */
+  .loading-overlay {
+    display: none; position: fixed;
+    inset: 0; z-index: 200;
+    background: rgba(11,14,20,0.7);
+    align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .loading-overlay.active { display: flex; }
+  .spinner-card {
+    background: var(--surface);
+    border: 1px solid var(--border-2);
+    border-radius: var(--r-xl);
+    padding: 40px;
+    text-align: center;
+    min-width: 220px;
+  }
+  .spinner {
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 3px solid var(--border-2);
+    border-top-color: var(--accent);
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner-label { font-size: 13px; color: var(--text-2); }
+
+  /* ── HOW IT WORKS ── */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 640px) { .steps { grid-template-columns: 1fr; } }
+  .step-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 24px;
+  }
+  .step-num {
+    font-family: var(--mono); font-size: 11px; font-weight: 500;
+    color: var(--accent); letter-spacing: 0.06em;
+    margin-bottom: 10px;
+  }
+  .step-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  .step-desc { font-size: 13px; color: var(--text-2); line-height: 1.6; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 24px 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+    font-size: 12px; color: var(--text-3);
+    max-width: 900px; margin: 0 auto;
+  }
+  footer a { color: var(--text-3); text-decoration: none; }
+  footer a:hover { color: var(--text-2); }
+  .footer-links { display: flex; gap: 16px; }
+
+  /* ── MOBILE ── */
+  @media (max-width: 600px) {
+    .hero { padding: 48px 1rem 40px; }
+    .section { padding: 40px 1rem; }
+    nav { padding: 0 1rem; }
+    .hero-stats { gap: 24px; }
+    .prob-grid { grid-template-columns: 1fr; }
+    .result-header { flex-direction: column; }
+    .result-meta { text-align: left; }
+    nav .nav-links { display: none; }
+  }
+
+  /* ── TRANSITIONS ── */
+  .fade-in { animation: fadeIn 0.4s ease forwards; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Error field */
+  .field.error input, .field.error select { border-color: var(--red); }
+  .field-err { font-size: 11px; color: var(--red); margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-brand" href="#">
+    <div class="nav-logo">
+      <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    </div>
+    CKD Predictor
+  </a>
+  <div class="nav-links">
+    <a class="nav-pill" href="#how-it-works">How it works</a>
+    <a class="nav-pill" href="https://huggingface.co/Emakporpaul/ckd-prediction" target="_blank">Model</a>
+    <a class="nav-pill" href="https://github.com/Emakporpaul/kidney-disease-prediction-ml" target="_blank">GitHub</a>
+  </div>
+  <a class="nav-cta" href="#predictor">Run assessment</a>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-eyebrow">
+    <span></span>
+    Random Forest · 98.75% Accuracy · 7 ML Models
+  </div>
+  <h1>Detect <em>Chronic Kidney Disease</em><br>from lab results</h1>
+  <p class="hero-sub">
+    Enter 24 clinical markers and get an instant AI-powered risk assessment
+    based on a model trained on the UCI CKD dataset.
+  </p>
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">98.75<small>%</small></div>
+      <div class="stat-label">Accuracy</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">100<small>%</small></div>
+      <div class="stat-label">Recall (no missed CKD)</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">400</div>
+      <div class="stat-label">Training samples</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">24</div>
+      <div class="stat-label">Clinical features</div>
+    </div>
+  </div>
+  <a class="scroll-cta" href="#predictor">
+    Start assessment
+    <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+  </a>
+</header>
+
+<!-- MODEL STRIP -->
+<div class="models-strip">
+  <div class="model-badge best-badge"><span class="dot"></span><strong>Random Forest</strong> · Best</div>
+  <div class="model-badge"><span class="dot" style="background:var(--text-3)"></span><strong>XGBoost</strong> · 98.75%</div>
+  <div class="model-badge"><span class="dot" style="background:var(--text-3)"></span><strong>Gradient Boosting</strong> · 95%</div>
+  <div class="model-badge"><span class="dot" style="background:var(--text-3)"></span><strong>Logistic Regression</strong> · 96.25%</div>
+  <div class="model-badge"><span class="dot" style="background:var(--text-3)"></span><strong>SVM</strong> · 93.75%</div>
+  <div class="model-badge"><span class="dot" style="background:var(--text-3)"></span><strong>Decision Tree</strong> · 95%</div>
+  <div class="model-badge"><span class="dot" style="background:var(--text-3)"></span><strong>KNN</strong> · 93.75%</div>
+</div>
+
+<!-- PREDICTOR -->
+<section id="predictor" class="section">
+  <div class="section-label">Clinical Assessment Tool</div>
+
+  <form id="ckd-form" novalidate>
+    <div class="form-grid">
+
+      <!-- Demographic -->
+      <div class="form-group-title">Demographics</div>
+
+      <div class="field">
+        <label>Age <span>(years)</span></label>
+        <input type="number" name="age" placeholder="e.g. 48" min="2" max="90" step="1" />
+      </div>
+
+      <div class="field">
+        <label>Blood Pressure <span>(mm/Hg)</span></label>
+        <input type="number" name="blood_pressure" placeholder="e.g. 80" min="50" max="180" />
+      </div>
+
+      <!-- Urine -->
+      <div class="form-group-title">Urinalysis</div>
+
+      <div class="field">
+        <label>Specific Gravity</label>
+        <input type="number" name="specific_gravity" placeholder="e.g. 1.020" step="0.001" min="1.005" max="1.025" />
+      </div>
+
+      <div class="field">
+        <label>Albumin</label>
+        <select name="albumin">
+          <option value="">Select level</option>
+          <option value="0">0</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Sugar</label>
+        <select name="sugar">
+          <option value="">Select level</option>
+          <option value="0">0</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Red Blood Cells</label>
+        <select name="red_blood_cells">
+          <option value="">Select</option>
+          <option value="normal">Normal</option>
+          <option value="abnormal">Abnormal</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Pus Cells</label>
+        <select name="pus_cells">
+          <option value="">Select</option>
+          <option value="normal">Normal</option>
+          <option value="abnormal">Abnormal</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Pus Cell Clumps</label>
+        <select name="pus_cell_clumps">
+          <option value="">Select</option>
+          <option value="present">Present</option>
+          <option value="notpresent">Not Present</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Bacteria</label>
+        <select name="bacteria">
+          <option value="">Select</option>
+          <option value="present">Present</option>
+          <option value="notpresent">Not Present</option>
+        </select>
+      </div>
+
+      <!-- Blood -->
+      <div class="form-group-title">Blood Tests</div>
+
+      <div class="field">
+        <label>Blood Glucose Random <span>(mgs/dl)</span></label>
+        <input type="number" name="blood_glucose_random" placeholder="e.g. 148" min="22" max="490" />
+      </div>
+
+      <div class="field">
+        <label>Blood Urea <span>(mgs/dl)</span></label>
+        <input type="number" name="blood_urea" placeholder="e.g. 42" min="1.5" max="391" />
+      </div>
+
+      <div class="field">
+        <label>Serum Creatinine <span>(mgs/dl)</span></label>
+        <input type="number" name="serum_creatinine" placeholder="e.g. 1.2" step="0.1" min="0.4" max="76" />
+      </div>
+
+      <div class="field">
+        <label>Sodium <span>(mEq/L)</span></label>
+        <input type="number" name="sodium" placeholder="e.g. 137" min="111" max="163" />
+      </div>
+
+      <div class="field">
+        <label>Potassium <span>(mEq/L)</span></label>
+        <input type="number" name="potassium" placeholder="e.g. 4.5" step="0.1" min="2.5" max="47" />
+      </div>
+
+      <div class="field">
+        <label>Haemoglobin <span>(gms)</span></label>
+        <input type="number" name="haemoglobin" placeholder="e.g. 15.4" step="0.1" min="3.1" max="17.8" />
+      </div>
+
+      <div class="field">
+        <label>Packed Cell Volume</label>
+        <input type="number" name="packed_cell_volume" placeholder="e.g. 44" min="9" max="54" />
+      </div>
+
+      <div class="field">
+        <label>White Blood Cell Count <span>(cells/cumm)</span></label>
+        <input type="number" name="white_blood_cell_count" placeholder="e.g. 7800" min="2200" max="26400" />
+      </div>
+
+      <div class="field">
+        <label>Red Blood Cell Count <span>(millions/cmm)</span></label>
+        <input type="number" name="red_blood_cell_count" placeholder="e.g. 5.2" step="0.1" min="2.1" max="8" />
+      </div>
+
+      <!-- Medical History -->
+      <div class="form-group-title">Medical History</div>
+
+      <div class="field">
+        <label>Hypertension</label>
+        <select name="hypertension">
+          <option value="">Select</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Diabetes Mellitus</label>
+        <select name="diabetes_mellitus">
+          <option value="">Select</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Coronary Artery Disease</label>
+        <select name="coronary_artery_disease">
+          <option value="">Select</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Appetite</label>
+        <select name="appetite">
+          <option value="">Select</option>
+          <option value="good">Good</option>
+          <option value="poor">Poor</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Pedal Edema</label>
+        <select name="pedal_edema">
+          <option value="">Select</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Anemia</label>
+        <select name="anemia">
+          <option value="">Select</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+
+      <!-- Submit -->
+      <div class="submit-row">
+        <button type="submit" class="btn-predict" id="predict-btn">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
+          Run Prediction
+        </button>
+        <button type="button" class="btn-reset" id="reset-btn">Clear form</button>
+        <div class="api-note">
+          <span class="dot"></span>
+          API live · HF Space
+        </div>
+      </div>
+
+    </div>
+  </form>
+</section>
+
+<!-- RESULT -->
+<section id="result-section" class="section">
+  <div class="section-label">Assessment Result</div>
+  <div id="result-card" class="result-card fade-in">
+
+    <div class="result-header">
+      <div class="result-verdict">
+        <div id="verdict-icon" class="verdict-icon">
+          <!-- icon injected by JS -->
+        </div>
+        <div>
+          <div class="verdict-label">Prediction</div>
+          <div id="verdict-text" class="verdict-text"></div>
+        </div>
+      </div>
+      <div class="result-meta">
+        <div class="result-model" id="result-model">Model: —</div>
+        <div class="result-ts" id="result-ts">—</div>
+      </div>
+    </div>
+
+    <div class="prob-grid">
+      <div class="prob-card">
+        <div class="prob-label">CKD probability</div>
+        <div id="prob-ckd" class="prob-value ckd">—</div>
+        <div class="prob-bar"><div id="bar-ckd" class="prob-fill ckd" style="width:0%"></div></div>
+      </div>
+      <div class="prob-card">
+        <div class="prob-label">Not CKD probability</div>
+        <div id="prob-no-ckd" class="prob-value no-ckd">—</div>
+        <div class="prob-bar"><div id="bar-no-ckd" class="prob-fill no-ckd" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <div id="warning-section" style="display:none" class="warning-box">
+      <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <p id="warning-text"></p>
+    </div>
+
+    <div class="disclaimer-box">
+      <strong>Clinical disclaimer:</strong> This tool is for research and educational purposes only.
+      It does not constitute medical advice. All predictions must be reviewed by a qualified clinician
+      before any clinical decision is made.
+    </div>
+
+    <div class="result-actions">
+      <button class="btn-outline" onclick="printResult()">
+        <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print report
+      </button>
+      <button class="btn-outline" onclick="scrollToForm()">
+        <svg viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+        New assessment
+      </button>
+      <button class="btn-outline" onclick="copyJSON()">
+        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy JSON
+      </button>
+    </div>
+
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works" class="section">
+  <div class="section-label">How it works</div>
+  <div class="steps">
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <div class="step-title">Enter lab values</div>
+      <div class="step-desc">Fill in the 24 clinical markers from a patient's urinalysis and blood panel. Empty fields are imputed using training-set statistics.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <div class="step-title">Preprocess & encode</div>
+      <div class="step-desc">Values are cleaned, label-encoded, and scaled using the same pipeline used during training — preventing data leakage at inference time.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">03</div>
+      <div class="step-title">Random Forest inference</div>
+      <div class="step-desc">The best-performing model (98.75% accuracy, 100% recall) runs inference via a FastAPI endpoint hosted on Hugging Face Spaces.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span>CKD Predictor · Paul Emakpor · 2025</span>
+  <div class="footer-links">
+    <a href="https://github.com/Emakporpaul/kidney-disease-prediction-ml" target="_blank">GitHub</a>
+    <a href="https://huggingface.co/Emakporpaul" target="_blank">Hugging Face</a>
+    <a href="https://emakporpaul-ckd-prediction-api.hf.space/docs" target="_blank">API docs</a>
+  </div>
+</footer>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading">
+  <div class="spinner-card">
+    <div class="spinner"></div>
+    <div class="spinner-label">Running inference…</div>
+  </div>
+</div>
+
+<script>
+const API = 'https://emakporpaul-ckd-prediction-api.hf.space/predict';
+let lastResult = null;
+
+// ── Form submit
+document.getElementById('ckd-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const data = new FormData(form);
+  const payload = {};
+
+  for (const [key, val] of data.entries()) {
+    if (val === '') continue;
+    const n = parseFloat(val);
+    payload[key] = isNaN(n) ? val : n;
+  }
+
+  if (Object.keys(payload).length === 0) {
+    alert('Please enter at least one value before running a prediction.');
+    return;
+  }
+
+  document.getElementById('loading').classList.add('active');
+  document.getElementById('predict-btn').disabled = true;
+
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Unknown error' }));
+      throw new Error(err.detail || `HTTP ${res.status}`);
+    }
+
+    const result = await res.json();
+    lastResult = result;
+    showResult(result);
+
+  } catch (err) {
+    alert(`Prediction failed: ${err.message}\n\nMake sure the HF Space is running at:\nhttps://emakporpaul-ckd-prediction-api.hf.space`);
+  } finally {
+    document.getElementById('loading').classList.remove('active');
+    document.getElementById('predict-btn').disabled = false;
+  }
+});
+
+// ── Render result
+function showResult(r) {
+  const isCKD = r.prediction === 1;
+  const card = document.getElementById('result-card');
+  const section = document.getElementById('result-section');
+
+  card.className = 'result-card fade-in ' + (isCKD ? 'ckd' : 'no-ckd');
+
+  // icon
+  const iconEl = document.getElementById('verdict-icon');
+  iconEl.className = 'verdict-icon ' + (isCKD ? 'ckd' : 'no-ckd');
+  iconEl.innerHTML = isCKD
+    ? '<svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
+    : '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+
+  // verdict
+  const vt = document.getElementById('verdict-text');
+  vt.textContent = isCKD ? 'Chronic Kidney Disease Detected' : 'No CKD Detected';
+  vt.className = 'verdict-text ' + (isCKD ? 'ckd' : 'no-ckd');
+
+  // probs
+  const pCKD = ((r.prob_ckd ?? 0) * 100).toFixed(1) + '%';
+  const pNo  = ((r.prob_not_ckd ?? 0) * 100).toFixed(1) + '%';
+  document.getElementById('prob-ckd').textContent = pCKD;
+  document.getElementById('prob-no-ckd').textContent = pNo;
+  setTimeout(() => {
+    document.getElementById('bar-ckd').style.width = pCKD;
+    document.getElementById('bar-no-ckd').style.width = pNo;
+  }, 50);
+
+  // meta
+  document.getElementById('result-model').textContent = 'Model: ' + (r.model_name ?? 'RandomForestClassifier');
+  document.getElementById('result-ts').textContent = new Date().toLocaleString();
+
+  // warning
+  const warn = document.getElementById('warning-section');
+  if (r.warning) {
+    warn.style.display = 'flex';
+    document.getElementById('warning-text').textContent = r.warning;
+  } else {
+    warn.style.display = 'none';
+  }
+
+  section.style.display = 'block';
+  section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Helpers
+document.getElementById('reset-btn').addEventListener('click', () => {
+  document.getElementById('ckd-form').reset();
+  document.getElementById('result-section').style.display = 'none';
+  document.getElementById('bar-ckd').style.width = '0%';
+  document.getElementById('bar-no-ckd').style.width = '0%';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+function scrollToForm() {
+  document.getElementById('predictor').scrollIntoView({ behavior: 'smooth' });
+}
+
+function printResult() { window.print(); }
+
+function copyJSON() {
+  if (!lastResult) return;
+  navigator.clipboard.writeText(JSON.stringify(lastResult, null, 2))
+    .then(() => alert('Result JSON copied to clipboard.'))
+    .catch(() => alert('Copy failed.'));
+}
+</script>
+</body>
+</html>
