@@ -10,6 +10,7 @@ pinned: false
 # 🩺 Chronic Kidney Disease Prediction
 
 [![CI](https://github.com/Emakporpaul/ckd-prediction/actions/workflows/ci.yml/badge.svg)](https://github.com/Emakporpaul/ckd-prediction/actions/workflows/ci.yml)
+[![Live Demo](https://img.shields.io/badge/🖥️%20Live%20App-GitHub%20Pages-success)](https://emakporpaul.github.io/kidney-disease-prediction-ml/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
 [![Hugging Face](https://img.shields.io/badge/🤗%20Model-Emakporpaul%2Fckd--prediction-yellow)](https://huggingface.co/Emakporpaul/ckd-prediction)
@@ -24,7 +25,8 @@ A production-quality machine learning system that predicts **Chronic Kidney Dise
 
 | Resource | Link |
 |----------|------|
-| 🔗 API (Swagger UI) | https://huggingface.co/spaces/Emakporpaul/ckd-prediction-api/docs |
+| 🖥️ **Live App** | https://emakporpaul.github.io/kidney-disease-prediction-ml/ |
+| 🔗 API (Swagger UI) | https://emakporpaul-ckd-prediction-api.hf.space/docs |
 | 🤗 Model artefacts | https://huggingface.co/Emakporpaul/ckd-prediction |
 | 📓 Notebooks | [`notebooks/`](notebooks/) |
 
@@ -73,6 +75,8 @@ ckd-prediction/
 ├── visualizations/              # Auto-generated plots from notebooks
 ├── app.py                       # FastAPI server
 ├── schemas.py                   # Pydantic request/response models
+├── index.html                   # Frontend web app (GitHub Pages)
+├── Dockerfile                   # HF Space container build
 ├── requirements.txt             # Runtime dependencies
 ├── requirements-dev.txt         # Dev + test dependencies
 └── .github/workflows/ci.yml     # GitHub Actions CI pipeline
@@ -107,6 +111,22 @@ uvicorn app:app --reload
 ```
 
 Open **http://localhost:8000/docs** for the interactive Swagger UI.
+
+### 4. Run the frontend locally
+
+```bash
+open index.html
+```
+
+The frontend calls the live HF Space API directly, so it works standalone — no local server needed. To point it at your local API instead, change the `API` constant near the top of the `<script>` block in `index.html`.
+
+---
+
+## Frontend
+
+A stand-alone single-page web app (`index.html`) provides a clinical-style form covering all 24 lab markers, grouped into Demographics, Urinalysis, Blood Tests, and Medical History. On submit, it calls the live API, then renders the prediction, both class probabilities, a confidence bar, and a low-confidence warning when applicable.
+
+Deployed via GitHub Pages at **https://emakporpaul.github.io/kidney-disease-prediction-ml/** — no build step, no dependencies, pure HTML/CSS/JS.
 
 ---
 
@@ -247,7 +267,7 @@ pytest tests/test_api.py -v
 
 ## Deployment
 
-The API is deployed as a Hugging Face Space using a `Dockerfile`:
+**API** — deployed as a Hugging Face Space using a `Dockerfile`:
 
 ```dockerfile
 FROM python:3.10-slim
@@ -259,6 +279,8 @@ EXPOSE 7860
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
 ```
 
+**Frontend** — deployed via GitHub Pages directly from `index.html` in the repo root. Settings → Pages → Source: `main` branch, `/ (root)`.
+
 > **Note:** This project is for research and educational purposes. Do not use model predictions as a substitute for professional medical diagnosis.
 
 ---
@@ -266,7 +288,9 @@ CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
 ## Author
 
 **Paul Emakpor**
+
 **AI/ML Engineer**
+
 - GitHub: [@Emakporpaul](https://github.com/Emakporpaul)
 - Hugging Face: [@Emakporpaul](https://huggingface.co/Emakporpaul)
 - LinkedIn: [paulemakpor](https://www.linkedin.com/in/paulemakpor)
